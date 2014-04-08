@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Load more</title>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" type="text/css" href="css/main.css" />
+		<link rel="stylesheet" type="text/css" href="css/grid.css" />
+		<link rel="stylesheet" type="text/css" href="css/menu.css" />
+	</head>
+	<body class="menu">
+		<header>
+			<nav class="menu-side">
+				This i menu.
+			</nav>
+		</header>
+
+		<div class="articles">
+			<div class="items">
+				<div class="item">
+					<h3><span data-field="title"></span> (<span data-field="id"></span>)</h3>
+					<p data-field="description"></p>
+				</div>
+			</div>
+		</div>
+		<a href="javascript:void(0);" class="items-load">Load</a>
+		<a href="javascript:void(0);" class="menu-toggle">☰</a>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="js/grid.js"></script>
+		<script src="js/loadmore.js"></script>
+		<script>
+			$('.articles').loadmore({
+				source : 'articles.php',
+				step : 2,
+				callback : renderGrid
+			});
+		</script>
+		<script>
+			(function(){ 
+				$('.menu-toggle').bind('click', function(){
+					$('body').toggleClass('menu-open');
+					$('.menu-toggle').toggleClass('menu-open');
+				});
+			})();
+		</script>
+		<script>
+			$(window).scroll(function() {
+				var curScroll = $(window).scrollTop();
+				var maxScroll = $(document).height();
+				var innerHeight = $(window).innerHeight();
+
+				if(curScroll + innerHeight >= maxScroll - 50) { 
+					$("body").height(maxScroll * 1.25);
+					$('.articles').loadmore({
+						source : 'articles.php',
+						step : 2,
+						callback : renderGrid
+					});
+				} 
+			});﻿
+		</script>
+	</body>
+</html>
