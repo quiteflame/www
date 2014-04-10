@@ -1,10 +1,12 @@
 var Game =  {
     _display: null,
     _currentScreen: null,
+    _screenWidth: 80,
+    _screenHeight: 24,
     
     init: function() {
         // Any necessary initialization will go here.
-        this._display = new ROT.Display({width: 80, height: 24, fontSize: 20});
+        this._display = new ROT.Display({width: this._screenWidth, height: this._screenHeight});
         
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
@@ -22,19 +24,31 @@ var Game =  {
 	            // When an event is received, send it to the
 	            // screen if there is one
 	            if (game._currentScreen !== null) {
-	                // Send the event type and data to the screen
-	                game._currentScreen.handleInput(event, e);
-	            }
+                    // Send the event type and data to the screen
+                    game._currentScreen.handleInput(event, e);
+                    // Clear the screen
+                    game._display.clear();
+                    // Render the screen
+                    game._currentScreen.render(game._display);
+                }
 	        });
-    }
-    // Bind keyboard input events
-    bindEventToScreen('keydown');
-    bindEventToScreen('keyup');
-    bindEventToScreen('keypress');
+        }
+        // Bind keyboard input events
+        bindEventToScreen('keydown');
+        // bindEventToScreen('keyup');
+        // bindEventToScreen('keypress');
     },
 
     getDisplay: function() {
         return this._display;
+    },
+
+    getScreenWidth: function() {
+        return this._screenWidth;
+    },
+
+    getScreenHeight: function() {
+        return this._screenHeight;
     },
 
     switchScreen: function(screen) {

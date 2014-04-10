@@ -28,21 +28,23 @@ Game.Screen.startScreen = {
 
 // Define our playing screen
 Game.Screen.playScreen = {
-    _width: 80,
-    _height: 24,
     _map: null,
+    _player: null,
 
     enter: function() {
         var map = [];
+        // Create a map based on our size parameters
+        var mapWidth = 500;
+        var mapHeight = 500;
 
-        for (var x = 0; x < this._width; x++) {
+        for (var x = 0; x < mapWidth; x++) {
             // Add all the tiles
-            for (var y = 0; y < this._height; y++) {
+            for (var y = 0; y < mapHeight; y++) {
                 map.push(Game.Tile.nullTile);
             }
         }
         // Setup the map generator
-        var generator = new ROT.Map.Cellular(this._width, this._height);
+        var generator = new ROT.Map.Cellular(mapWidth, mapHeight);
         generator.randomize(0.5);
         var totalIterations = 3;
         // Iteratively smoothen the map
@@ -58,7 +60,12 @@ Game.Screen.playScreen = {
             }
         });
         // Create our map from the tiles
-        this._map = new Game.Map(map, this._width, this._height);
+        this._map = new Game.Map(map, mapWidth, mapHeight);
+        // Create our player and set the position
+        this._player = new Game.Entity(Game.PlayerTemplate);
+        var position = this._map.getRandomFloorPosition();
+        this._player.setX(position.x);
+        this._player.setY(position.y);
     },
 
     exit: function() { 
@@ -66,16 +73,38 @@ Game.Screen.playScreen = {
     },
 
     render: function(display) {
-        for (var x = 0; x < this._map.getWidth(); x++) {
-            for (var y = 0; y < this._map.getHeight(); y++) {
+        var screenWidth = Game.getScreenWidth();
+        var screenHeight = Game.getScreenHeight();
+        // Make sure the x-axis doesn't go to the left of the left bound
+        var topLeftX = Math.max(0, this._player.getX() - (screenWidth / 2));
+        // Make sure we still have enough space to fit an entire game screen
+        topLeftX = Math.min(topLeftX, this._map.getWidth() - screenWidth);
+        // Make sure the y-axis doesn't above the top bound
+        var topLeftY = Math.max(0, this._player.getY() - (screenHeight / 2));
+        // Make sure we still have enough space to fit an entire game screen
+        topLeftY = Math.min(topLeftY, this._map.getHeight() - screenHeight);
+        // Iterate through all visible map cells
+        for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
+            for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
                 // Fetch the glyph for the tile and render it to the screen
-                var glyph = this._map.getTile(x, y).getGlyph();
-                display.draw(x, y,
-                    glyph.getChar(), 
-                    glyph.getForeground(), 
-                    glyph.getBackground());
+                // at the offset position.
+                var tile = this._map.getTile(x, y);
+                display.draw(
+                    x - topLeftX,
+                    y - topLeftY,
+                    tile.getChar(), 
+                    tile.getForeground(), 
+                    tile.getBackground())
             }
         }
+        // Render the player
+        display.draw(
+            this._player.getX() - topLeftX, 
+            this._player.getY() - topLeftY,    
+            this._player.getChar(), 
+            this._player.getForeground(), 
+            this._player.getBackground()
+        );
     },
 
     handleInput: function(inputType, inputData) {
@@ -87,7 +116,24 @@ Game.Screen.playScreen = {
             } else if (inputData.keyCode === ROT.VK_ESCAPE) {
                 Game.switchScreen(Game.Screen.loseScreen);
             }
+            // Movement
+            if (inputData.keyCode === ROT.VK_LEFT) {
+                this.move(-1, 0);
+            } else if (inputData.keyCode === ROT.VK_RIGHT) {
+                this.move(1, 0);
+            } else if (inputData.keyCode === ROT.VK_UP) {
+                this.move(0, -1);
+            } else if (inputData.keyCode === ROT.VK_DOWN) {
+                this.move(0, 1);
+            }
         }    
+    },
+
+    move: function(dX, dY) {
+        var newX = this._player.getX() + dX;
+        var newY = this._player.getY() + dY;
+        // Try to move to the new cell
+        this._player.tryMove(newX, newY, this._map);
     }
 }
 
