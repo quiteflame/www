@@ -26,10 +26,6 @@ var Game =  {
 	            if (game._currentScreen !== null) {
                     // Send the event type and data to the screen
                     game._currentScreen.handleInput(event, e);
-                    // Clear the screen
-                    game._display.clear();
-                    // Render the screen
-                    game._currentScreen.render(game._display);
                 }
 	        });
         }
@@ -37,6 +33,13 @@ var Game =  {
         bindEventToScreen('keydown');
         // bindEventToScreen('keyup');
         // bindEventToScreen('keypress');
+    },
+    
+    refresh: function() {
+        // Clear the screen
+        this._display.clear();
+        // Render the screen
+        this._currentScreen.render(this._display);
     },
 
     getDisplay: function() {
@@ -52,21 +55,21 @@ var Game =  {
     },
 
     switchScreen: function(screen) {
-	    // If we had a screen before, notify it that we exited
-	    if (this._currentScreen !== null) {
-	        this._currentScreen.exit();
-	    }
-	    // Clear the display
-	    this.getDisplay().clear();
-	    // Update our current screen, notify it we entered
-	    // and then render it
-	    this._currentScreen = screen;
-	    if (!this._currentScreen !== null) {
-	        this._currentScreen.enter();
-	        this._currentScreen.render(this._display);
-	    }
-	}
-}
+        // If we had a screen before, notify it that we exited
+        if (this._currentScreen !== null) {
+            this._currentScreen.exit();
+        }
+        // Clear the display
+        this.getDisplay().clear();
+        // Update our current screen, notify it we entered
+        // and then render it
+        this._currentScreen = screen;
+        if (!this._currentScreen !== null) {
+            this._currentScreen.enter();
+            this.refresh();
+        }
+    }
+};
 
 $(window).load(function() {
     // Check if rot.js can work on this browser

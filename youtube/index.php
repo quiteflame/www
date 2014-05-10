@@ -1,14 +1,5 @@
 <?php
 
-if(version_compare(phpversion(),"5.3.4",">=")){
-  $disable_gzip = false;
-}else{
-  $disable_gzip = true;
-}
-
-var_dump($disable_gzip);
-
-// Call set_include_path() as needed to point to your client library.
 require_once 'Google/Client.php';
 require_once 'Google/Service/YouTube.php';
 session_start();
@@ -22,7 +13,7 @@ session_start();
  */
 $OAUTH2_CLIENT_ID = '788892358631-7qgnhih2vuu6qktnsofhnvkifbdodvqj.apps.googleusercontent.com';
 $OAUTH2_CLIENT_SECRET = 'bx6xRMWuE2XJw0LnuhuQovTB';
-$OAUTH2_REDIRECT_URI = 'http://localhost/youtube/index.php';
+$OAUTH2_REDIRECT_URI = 'http://kmoluszys.mthink.dev.speednet.pl/index.php';
 
 $client = new Google_Client();
 $client->setClientId($OAUTH2_CLIENT_ID);
@@ -47,6 +38,11 @@ if (isset($_GET['code'])) {
   $_SESSION['token'] = $client->getAccessToken();
   header('Location: ' . $redirect);
 }
+
+var_dump($_SESSION['state']);
+var_dump($_GET['state']);
+var_dump($_GET['code']);
+var_dump($_SESSION['token']);
 
 if (isset($_SESSION['token'])) {
   $client->setAccessToken($_SESSION['token']);
